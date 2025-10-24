@@ -3,26 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
+use App\Mail\ContactMail;
 use Illuminate\Http\Request;
+use App\Http\Requests\ContactFormRequest;
 
 class ContactController extends Controller
 {
-	public function store(Request $request)
+	public function store(ContactFormRequest $request)
 	{
-		$validated = $request->validate([
-			'name' => 'required|string|max:255',
-			'phone' => 'required|regex:/^\+7 \d{3} \d{3} \d{2} \d{2}$/',
-			'email' => 'required|email',
-
-		]);
+		$validated = $request->validated();
 
 		$contact = Contact::create($validated);
+
+		\Mail::to('admin@example.com')->send(new ContactMail($contact));
 
 		return response()->json(['message' => 'Форма успешно отправлена']);
 	}
 
 	public function showForm()
     {
-        return view('contact');  // Верните ваш шаблон с формой
+        return view('contact');
     }
 }
